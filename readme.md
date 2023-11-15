@@ -156,3 +156,138 @@ On macOS often occupated 5000 and 7000 ports.
 This happens because Control Center on Monterey listening to port 5000 and port 7000.
 
 For fixing this you need to turn off System Settings > General > AirDrop & Handoff > AirPlay Receiver.
+
+If package.json doesn't contain any settings about port, port be pulled from the webpack.config.ts.
+Also we can write port in terminal like this
+
+```shell
+npm run start -- --env port=3333
+```
+
+## Using source maps
+
+https://webpack.js.org/guides/development/#using-source-maps
+
+Add source maps setup in webpack.config.ts for improve your expiriens.
+Before devServer: section.
+
+```js
+devtool: 'inline-source-map',
+```
+
+If we add **isDev** parametr in file webpack.config.ts, we can manage between two operating modes - prod or dev.
+
+```js
+devtool: isDev && 'inline-source-map',
+```
+
+## install React + typescript
+
+react is installed as production
+ts for react is installed only dev dependencies.
+
+```shell
+npm i react@18.2.0 react-dom@18.2.0
+npm i -D @types/react@18.2.25 @types/react-dom@18.2.11
+```
+
+We need to add row in tsconfig.json file
+
+```json
+"jsx": "react-jsx",
+```
+
+because without this our index.tsx is fall out error.
+Either we must change the tsconfig.json or import react in all our .ts and tsx files.
+
+## install css styles
+
+https://webpack.js.org/loaders/css-loader/#root
+
+Install css-loader for webpack
+
+```shell
+npm install --save-dev css-loader@6.8.1
+```
+
+Then add rule of css-loader to webpack.config.js
+
+```js
+{
+  test: /\.css$/i,
+  use: ["style-loader", "css-loader"],
+},
+```
+
+Порядок правил ОЧЕНЬ ВАЖЕН!!!!
+
+Also we need to install style-loader
+
+```shell
+npm i -D style-loader@3.3.3
+```
+
+### scss will be processed too.
+
+https://webpack.js.org/loaders/sass-loader/#root
+
+Install sass-loader too for processing scss files.
+
+```shell
+npm i -D sass@1.69.0 sass-loader@13.3.2
+```
+
+And then we need replace only css rule with sass rule in webpack.config.js. Because it includes all css + sass + scss.
+
+```js
+{
+  test: /\.s[ac]ss$/i,
+  use: [
+    // Creates `style` nodes from JS strings
+    'style-loader',
+    // Translates CSS into CommonJS
+    'css-loader',
+    // Compiles Sass to CSS
+    'sass-loader',
+  ],
+},
+```
+
+### divide css and js code.
+
+We want to get different files for js and css.
+We don't wont to pack css+jss in one big file.
+
+https://webpack.js.org/plugins/mini-css-extract-plugin/#root
+
+Install mini-css-extract-plugin
+
+```shell
+npm i -D mini-css-extract-plugin@2.7.6
+```
+
+Add this object in plugins section of webpack
+
+```js
+new MiniCssExtractPlugin({
+  filename: 'css/[name].[contenthash:8].css',
+  chunkFilename: 'css/[name].[contenthash:8].css',
+}),
+```
+
+Add MiniCssExtractPlugin.loader instead 'style-loader' in rule section of webpack.config.js
+
+```js
+{
+  test: /\.s[ac]ss$/i,
+  use: [
+    // Creates `style` nodes from JS strings
+    //use MiniCssExtractPlugin instead style-loader
+    MiniCssExtractPlugin.loader,
+    // Translates CSS into CommonJS
+    'css-loader',
+    // Compiles Sass to CSS
+    'sass-loader',
+  ],
+},
+```
