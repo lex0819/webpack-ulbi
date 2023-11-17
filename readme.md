@@ -291,3 +291,71 @@ Add MiniCssExtractPlugin.loader instead 'style-loader' in rule section of webpac
   ],
 },
 ```
+
+## Style isolation. Css modules
+
+For good name spacing in many style's files we can use module css.
+
+there were App.scss file
+We have changed it to App.module.scss file.
+
+And now all selectors in App.scss have became uniq.
+
+Easy fix is to create global definition (eg. file called **global.d.ts** in your source root) for importing CSS Modules or SCSS Modules:
+
+```js
+declare module "*.module.scss" {
+  interface IClassNames {
+    [className: string]: string
+  }
+  const classNames: IClassNames;
+  export = classNames;
+}
+```
+
+We need import styles from module like this
+
+```js
+import styles from './App.module.scss';
+```
+
+Also we need setup **css-loader** for module's work in the webpack.config.js file.
+webpack was divided by many modules.
+Loaders are in ./config/build/buildLoaders.ts file.
+Add there from document https://webpack.js.org/loaders/css-loader/#modules
+
+```js
+test: /\.css$/i,
+loader: "css-loader",
+options: {
+  modules: {
+    localIdentName: string,
+    },
+},
+```
+
+It is converted inside the file **buildLoaders.ts** as
+
+```js
+const cssLoadersWithModules = {
+  loader: 'css-loader',
+  options: {
+    modules: {
+      localIdentName: isDev ? '[path][name]__[local]' : '[hash:base64:8]',
+    },
+  },
+};
+
+const scssLoader = {
+  test: /\.s[ac]ss$/i,
+  use: [
+    // Creates `style` nodes from JS strings
+    //use MiniCssExtractPlugin instead style-loader
+    isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+    // Translates CSS into CommonJS
+    cssLoadersWithModules,
+    // Compiles Sass to CSS
+    'sass-loader',
+  ],
+};
+```

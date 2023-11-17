@@ -7,6 +7,15 @@ export function buildLoader(options: BuildOptions): ModuleOptions['rules'] {
 
   const isDev = options.mode === 'development';
 
+  const cssLoadersWithModules = {
+    loader: 'css-loader',
+    options: {
+      modules: {
+        localIdentName: isDev ? '[path][name]__[local]' : '[hash:base64:8]',
+      },
+    },
+  };
+
   const scssLoader = {
     test: /\.s[ac]ss$/i,
     use: [
@@ -14,7 +23,7 @@ export function buildLoader(options: BuildOptions): ModuleOptions['rules'] {
       //use MiniCssExtractPlugin instead style-loader
       isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
       // Translates CSS into CommonJS
-      'css-loader',
+      cssLoadersWithModules,
       // Compiles Sass to CSS
       'sass-loader',
     ],
