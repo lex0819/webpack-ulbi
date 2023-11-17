@@ -359,3 +359,171 @@ const scssLoader = {
   ],
 };
 ```
+
+## routing
+
+install react-router-dom
+
+```shell
+npm i -D react-router-dom@6.16.0
+```
+
+Docs are in https://reactrouter.com/en/main/start/tutorial
+
+import react-router to main js entry point.
+And add come code to it.
+
+```js
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    children: [
+      {
+        path: '/about',
+        element: <h1>about</h1>,
+      },
+      {
+        path: '/shop',
+        element: <h1>shop</h1>,
+      },
+    ],
+  },
+]);
+const container = createRoot(root);
+
+container.render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>
+);
+```
+
+We have wrapped our component <App/> to router
+
+### <Outlet/>
+
+This component from router library we need add to main component for show our router's link.
+
+```js
+
+```
+
+### historyApiFallback
+
+Aslo we need to add one row for dev-server that routing runs on dev mode.
+Let's go to file buildDevServer.ts and add there
+
+```js
+historyApiFallback: true,
+```
+
+## pages
+
+We create some pages in pages folder.
+We can create lazy component too.
+
+### lazy pages
+
+```js
+import { lazy } from 'react';
+
+export const lazyAbout = lazy(() => import('./About'));
+```
+
+For example - we made two files - About.tsx and his lazy version About.lazy.tsx
+
+сам роутинг пишем в индекс файле
+
+```js
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    children: [
+      {
+        path: '/about',
+        element: <About />,
+      },
+      {
+        path: '/shop',
+        element: (
+          <Suspense>
+            <Shop />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+]);
+```
+
+и оборачиваем компоненты страниц с ленивой загрузкой в <Suspense>! иначе не работает!
+
+## chunk
+
+после применения ленивой загрузки страниц вебпак сделает сборку для прод из нескольких чанков - по страницам.
+Это сильно уменьшит размер мейн бандла и отдаст пользователю только нужное.
+
+Следить за чанками и управлять ими можно инструментом
+
+## webpack-bundle-analyzer
+
+Docs are here https://github.com/webpack-contrib/webpack-bundle-analyzer
+Usage (as a plugin) by CommonJS style. It doesn't support ES_modules style with import.
+
+```js
+const BundleAnalyzerPlugin =
+  require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+module.exports = {
+  plugins: [new BundleAnalyzerPlugin()],
+};
+```
+
+The tool is just plugin and it must be add to plugin section
+
+Or we must install @types/webpack-bundle-analyzer yet. Than import will be run good.
+
+```shell
+npm i -D webpack-bundle-analyzer@4.9.1 @types/webpack-bundle-analyzer
+```
+
+Add in types of mode
+
+```js
+analyzer?: boolean;
+```
+
+Then add in buildPlugins
+
+```js
+if (analyzer) {
+  plugins.push(new BundleAnalyzerPlugin());
+}
+```
+
+then add in webpack.config
+interface and Configuration
+
+```js
+interface EnvVariables {
+  mode: BuildMode;
+  port: number;
+  analyzer: boolean;
+}
+....
+const config: webpack.Configuration = buildWebpack({
+    port: env.port ?? 5001,
+    mode: env.mode ?? 'development',
+    paths,
+    analyzer: env.analyzer,
+  });
+```
+
+then we can run command for npm in terminal with key analyzer like this
+
+```shell
+npm run build:prod -- --env analyzer=true
+```
+
+only this command will create map around bundle and chunks for us.

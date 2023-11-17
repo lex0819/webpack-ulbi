@@ -1,12 +1,17 @@
+// const BundleAnalyzerPlugin =
+//   require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 import webpack from 'webpack';
 import { Configuration } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { BuildOptions } from './types/types';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 export function buildPlugins({
   mode,
   paths,
+  analyzer,
 }: BuildOptions): Configuration['plugins'] {
   const isDev = mode === 'development';
 
@@ -27,6 +32,9 @@ export function buildPlugins({
         chunkFilename: 'css/[name].[contenthash:8].css',
       })
     );
+  }
+  if (analyzer) {
+    plugins.push(new BundleAnalyzerPlugin());
   }
 
   return plugins;
