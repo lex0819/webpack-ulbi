@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './App.module.scss';
 import { Link, Outlet } from 'react-router-dom';
+import Images from './images';
 
 export const App = () => {
   const [count, setCount] = useState<number>(0);
@@ -24,6 +25,7 @@ export const App = () => {
         <span>inc</span>
       </button>
       <Outlet />
+      <Images />
     </div>
   );
 };

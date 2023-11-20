@@ -7,6 +7,11 @@ export function buildLoader(options: BuildOptions): ModuleOptions['rules'] {
 
   const isDev = options.mode === 'development';
 
+  const assetsLoader = {
+    test: /\.(png|svg|jpg|jpeg|gif)$/i,
+    type: 'asset/resource',
+  };
+
   const cssLoadersWithModules = {
     loader: 'css-loader',
     options: {
@@ -39,6 +44,7 @@ export function buildLoader(options: BuildOptions): ModuleOptions['rules'] {
 
   return [
     //порядок правил имеет значение!
+    assetsLoader,
     scssLoader,
     tsLoader,
   ];

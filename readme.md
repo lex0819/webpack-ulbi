@@ -527,3 +527,109 @@ npm run build:prod -- --env analyzer=true
 ```
 
 only this command will create map around bundle and chunks for us.
+
+## aliases
+
+Пока в проекте работаем с относительными путями, т.е.
+./path_dir/file_name - это в текущей папке
+
+Теперь хотим работает с абсолютными путями -
+от root,
+от https://
+и т.д.
+
+если вложенность небольшая, то относительные пути выглядят неплохо
+../path_dir/file_name - это на один уровень выше
+../../path_dir/file_name - это на два уровня выше
+
+### Объявляем алиасы в секции resolve
+
+Change file types.ts, add parameter **src**
+It is alias for our folder "src".
+
+```js
+export interface BuildPaths {
+  entry: string;
+  html: string;
+  output: string;
+  src: string;
+}
+```
+
+Add section aliases to buildResolvers.ts where is webpack.Configuration['resolve']
+
+```js
+export function buildResolvers(
+  options: BuildOptions
+): Configuration['resolve'] {
+  return {
+    extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      '@': options.paths.src,
+    },
+  };
+}
+```
+
+Add declere path to src to the webpack.config
+
+```js
+const paths: BuildPaths = {
+  output: path.resolve(__dirname, 'dist'),
+  entry: path.resolve(__dirname, 'src', 'index.tsx'),
+  html: path.resolve(__dirname, 'public', 'index.html'),
+  src: path.resolve(__dirname, 'src'),
+};
+```
+
+Add path with alias src to tsconfig too.
+It is needed two parameters - "baseUrl" and "paths"
+
+```js
+"allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+```
+
+## assets
+
+Processing of media content like icons, images, etc.
+
+We need to use loader for processing those files - png loader, jpg loader etc.
+https://webpack.js.org/guides/asset-management/
+
+Add assets loader to section loaders in webpack
+
+in file buildLoaders.ts
+
+```js
+const assetsLoader = {
+  test: /\.(png|svg|jpg|jpeg|gif)$/i,
+  type: 'asset/resource',
+};
+```
+
+and add const assetsLoader to return array of loaders.
+
+Also add declare for TS in file global.d.ts
+
+```js
+declare module '*.jpg';
+declare module '*.png';
+declare module '*.jpeg';
+```
+
+Now we can import picture from picture's file like this
+
+```js
+import Laguna from '@/assets/laguna-3024x4032.jpg';
+```
+
+and variable Laguna will be reterned path to picture.
+
+```js
+<img src={Laguna} alt="" loading="lazy" />
+```
